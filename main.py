@@ -1,6 +1,6 @@
 import pygame
 import random
-
+from logics import *
 
 def pretty_print(arr):
     """"prints given array arr in pretty way"""
