@@ -1,5 +1,5 @@
 import unittest
-from main import *
+from logics import *
 
 
 class Test2048(unittest.TestCase):
@@ -48,6 +48,34 @@ class Test2048(unittest.TestCase):
 
     def test_8(self):
         self.assertEqual(get_index_from_number(4, 6), (1, 1))
+
+    def test_9(self):
+        arr = [
+            [2, 2, 2, 4],
+            [2, 2, 2, 4],
+            [2, 2, 2, 4],
+            [2, 2, 2, 4],
+        ]
+        self.assertEqual(is_zero_cells(arr), False)
+
+    def test_10(self):
+        arr = [
+            [0, 2, 2, 4],
+            [0, 2, 2, 4],
+            [2, 2, 0, 4],
+            [2, 2, 2, 4],
+        ]
+        self.assertEqual(is_zero_cells(arr), True)
+
+    def test_11(self):
+        arr = [
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+        ]
+        self.assertEqual(is_zero_cells(arr), True)
+
 
 if __name__ == "main":
     unittest.main()
