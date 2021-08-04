@@ -40,7 +40,100 @@ def get_empty_cells(arr):
 
 
 def is_zero_cells(arr):
+    """"checks if there is empty cells (0) in the array """
     for row in arr:
         if 0 in row:
             return True
+    return False
+
+
+def move_left(arr):
+    """"function to move all elements to the left"""
+    n = len(arr[0])
+    delta = 0
+    for row in arr:
+        while 0 in row:
+            row.remove(0)
+        while len(row) < 4:
+            row.append(0)
+    for i in range(n):
+        for j in range(n-1):
+            if arr[i][j] == arr[i][j+1] and arr[i][j] != 0:
+                arr[i][j] *= 2
+                delta += arr[i][j]
+                arr[i].pop(j+1)
+                arr[i].append(0)
+    return arr, delta
+
+
+def move_right(arr):
+    """"function to move all elements to the right"""
+    n = len(arr[0])
+    delta = 0
+    for row in arr:
+        while 0 in row:
+            row.remove(0)
+        while len(row) < 4:
+            row.insert(0, 0)
+    for i in range(n):
+        for j in range(n-1, 0, -1):
+            if arr[i][j] == arr[i][j-1] and arr[i][j] != 0:
+                arr[i][j] *= 2
+                delta += arr[i][j]
+                arr[i].pop(j-1)
+                arr[i].insert(0, 0)
+    return arr, delta
+
+
+def move_up(arr):
+    """"function to move all elements up"""
+    n = len(arr[0])
+    delta = 0
+    for j in range(n):
+        column = []
+        for i in range(n):
+            if arr[i][j] != 0:
+                column.append(arr[i][j])
+        while len(column) < 4:
+            column.append(0)
+        for i in range(n - 1):
+            if column[i] == column[i+1] and column[i] != 0:
+                column[i] *= 2
+                delta += column[i]
+                column.pop(i+1)
+                column.append(0)
+        for i in range(n):
+            arr[i][j] = column[i]
+    return arr, delta
+
+
+def move_down(arr):
+    """"function to move all elements down"""
+    n = len(arr[0])
+    delta = 0
+    for j in range(n):
+        column = []
+        for i in range(n):
+            if arr[i][j] != 0:
+                column.append(arr[i][j])
+        while len(column) < 4:
+            column.insert(0, 0)
+        for i in range(n - 1, 0, -1):
+            if column[i] == column[i-1] and column[i] != 0:
+                column[i] *= 2
+                delta += column[i]
+                column.pop(i-1)
+                column.insert(0, 0)
+        for i in range(n):
+            arr[i][j] = column[i]
+    return arr, delta
+
+
+def is_possible_move(arr):
+    """"checks if it is possible to make any move"""
+    n = len(arr[0])
+    for i in range(n - 1):
+        for j in range(n - 1):
+            if arr[i][j] == arr[i][j+1] or arr[i][j] == arr[i+1][j]:
+                return True
     return False

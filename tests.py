@@ -76,6 +76,92 @@ class Test2048(unittest.TestCase):
         ]
         self.assertEqual(is_zero_cells(arr), True)
 
+    def test_12(self):
+        arr = [
+            [2, 2, 0, 0],
+            [0, 4, 4, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+        ]
+        rez = [
+            [4, 0, 0, 0],
+            [8, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+        ]
+        self.assertEqual(move_left(arr), (rez, 12))
+
+    def test_13(self):
+        arr = [
+            [2, 4, 4, 2],
+            [4, 0, 0, 2],
+            [0, 0, 0, 0],
+            [8, 8, 4, 4],
+        ]
+        rez = [
+            [2, 8, 2, 0],
+            [4, 2, 0, 0],
+            [0, 0, 0, 0],
+            [16, 8, 0, 0],
+        ]
+        self.assertEqual(move_left(arr), (rez, 32))
+
+    def test_14(self):
+        arr = [
+            [2, 4, 0, 2],
+            [2, 0, 2, 0],
+            [4, 0, 2, 4],
+            [4, 4, 0, 0],
+        ]
+        rez = [
+            [4, 8, 4, 2],
+            [8, 0, 0, 4],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+        ]
+        self.assertEqual(move_up(arr), (rez, 24))
+
+    def test_15(self):
+        arr = [
+            [2, 4, 0, 2],
+            [2, 0, 2, 0],
+            [4, 0, 2, 4],
+            [4, 4, 0, 0],
+        ]
+        rez = [
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [4, 0, 0, 2],
+            [8, 8, 4, 4],
+        ]
+        self.assertEqual(move_down(arr), (rez, 24))
+
+    def test_16(self):
+        arr = [
+            [2, 4, 0, 2],
+            [2, 0, 2, 0],
+            [4, 0, 2, 4],
+            [4, 4, 0, 0],
+        ]
+        self.assertEqual(is_possible_move(arr), True)
+
+    def test_17(self):
+        arr = [
+            [2, 4, 8, 2],
+            [8, 2, 4, 8],
+            [4, 8, 2, 4],
+            [8, 4, 2, 8],
+        ]
+        self.assertEqual(is_possible_move(arr), True)
+
+    def test_18(self):
+        arr = [
+            [2, 4, 8, 2],
+            [8, 2, 4, 8],
+            [4, 8, 2, 4],
+            [8, 4, 16, 8],
+        ]
+        self.assertEqual(is_possible_move(arr), False)
 
 if __name__ == "main":
     unittest.main()
