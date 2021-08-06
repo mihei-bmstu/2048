@@ -18,3 +18,10 @@ def get_best_result():
     """
                 )
     return cur.fetchall()
+
+
+def insert_result(name, score):
+    cur.execute("""
+        INSERN INTO records values ( ?, ?)
+    """, (name, score))
+    bd.commit()

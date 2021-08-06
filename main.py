@@ -1,7 +1,7 @@
 import pygame
 import sys
 from logics import *
-from database import get_best_result, cur
+from database import get_best_result, insert_result, cur
 
 
 def draw_intro():
@@ -11,19 +11,19 @@ def draw_intro():
     name = "Введите имя"
     name_not_typed = True
     while name_not_typed:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+        for _event in pygame.event.get():
+            if _event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit(0)
-            elif event.type == pygame.KEYDOWN:
-                if event.unicode.isalpha():
+            elif _event.type == pygame.KEYDOWN:
+                if _event.unicode.isalpha():
                     if name == "Введите имя":
-                        name = event.unicode
+                        name = _event.unicode
                     else:
-                        name += event.unicode
-                elif event.key == pygame.K_BACKSPACE:
+                        name += _event.unicode
+                elif _event.key == pygame.K_BACKSPACE:
                     name = name[:-1]
-                elif event.key == pygame.K_RETURN:
+                elif _event.key == pygame.K_RETURN:
                     if len(name) > 2:
                         global username
                         username = name
@@ -39,14 +39,42 @@ def draw_intro():
     screen.fill(BLACK)
 
 
+def draw_gameover():
+    img2048 = pygame.image.load("2048_logo.png")
+    font = pygame.font.SysFont("stxingkai", 64)
+    text_gameover = font.render("Game over!", True, WHITE)
+    text_score = font.render(f"Вы набрали: {score}", True, WHITE)
+    try:
+        best_score = GAMERS_DB[0][1]
+    except:
+        best_score = 100
+    if score > best_score:
+        text = "Рекорд побит"
+    else:
+        text = f"Рекорд: {best_score}"
+    text_record = font.render(text, True, WHITE)
+    insert_result(username, score)
+    while True:
+        for _event in pygame.event.get():
+            if _event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit(0)
+        screen.fill(BLACK)
+        screen.blit(text_gameover, (220, 80))
+        screen.blit(text_score, (30, 250))
+        screen.blit(text_record, (30, 330))
+        screen.blit(pygame.transform.scale(img2048, (200, 200,)), (10, 10))
+        pygame.display.update()
+
+
 def draw_top_gamers():
     font_top = pygame.font.SysFont("simsun", 30)
     font_gamer = pygame.font.SysFont("simsun", 20)
     text_head = font_top.render("Best: ", True, COLOR_TEXT)
     screen.blit(text_head, (250, 5))
     for index, gamer in enumerate(GAMERS_DB):
-        name, score = gamer
-        s = f"{index + 1}. {name} - {score}"
+        name, _score = gamer
+        s = f"{index + 1}. {name} - {_score}"
         text_gamer = font_gamer.render(s, True, COLOR_TEXT)
         screen.blit(text_gamer, (250, 35 + 25 * index))
 
@@ -144,11 +172,14 @@ while is_zero_cells(game_field) or is_possible_move(game_field):
             elif event.key == pygame.K_DOWN:
                 game_field, delta = move_down(game_field)
             score += delta
-            empty_cells = get_empty_cells(game_field)
-            random.shuffle(empty_cells)
-            num_to_fill = empty_cells.pop()
-            x, y = get_index_from_number(len(game_field[0]), num_to_fill)
-            game_field = insert_2_or_4(game_field, x, y)
-            print(f"Filling cell {num_to_fill}")
+            if is_zero_cells(game_field):
+                empty_cells = get_empty_cells(game_field)
+                random.shuffle(empty_cells)
+                num_to_fill = empty_cells.pop()
+                x, y = get_index_from_number(len(game_field[0]), num_to_fill)
+                game_field = insert_2_or_4(game_field, x, y)
+                print(f"Filling cell {num_to_fill}")
             draw_interface(score, delta)
             pygame.display.update()
+
+draw_gameover()
