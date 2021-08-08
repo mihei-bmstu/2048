@@ -4,6 +4,17 @@ from logics import *
 from database import get_best_result, insert_result, cur
 
 
+def init_values():
+    global game_field, score
+    game_field = [
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+    ]
+    score = 0
+
+
 def draw_intro():
     img2048 = pygame.image.load("2048_logo.png")
     font = pygame.font.SysFont("stxingkai", 70)
@@ -40,6 +51,7 @@ def draw_intro():
 
 
 def draw_gameover():
+    global username
     img2048 = pygame.image.load("2048_logo.png")
     font = pygame.font.SysFont("stxingkai", 64)
     text_gameover = font.render("Game over!", True, WHITE)
@@ -54,11 +66,22 @@ def draw_gameover():
         text = f"Рекорд: {best_score}"
     text_record = font.render(text, True, WHITE)
     insert_result(username, score)
-    while True:
+    make_decision = False
+    while not make_decision:
         for _event in pygame.event.get():
             if _event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit(0)
+            elif _event.type == pygame.KEYDOWN:
+                if _event.key == pygame.K_SPACE:
+                    # simple restart
+                    make_decision = True
+                    init_values()
+                elif _event.key == pygame.K_RETURN:
+                    # restart with new name
+                    username = None
+                    make_decision = True
+                    init_values()
         screen.fill(BLACK)
         screen.blit(text_gameover, (220, 80))
         screen.blit(text_score, (30, 250))
@@ -108,13 +131,46 @@ def draw_interface(cur_score, cur_delta=0):
                 screen.blit(text, (text_x, text_y))
 
 
-username = ""
+def game_loop():
+    global score, game_field
+    draw_interface(score)
+    pygame.display.update()
+    while is_zero_cells(game_field) or is_possible_move(game_field):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit(0)
+            elif event.type == pygame.KEYDOWN:
+                delta = 0
+                if event.key == pygame.K_LEFT:
+                    game_field, delta = move_left(game_field)
+                elif event.key == pygame.K_RIGHT:
+                    game_field, delta = move_right(game_field)
+                elif event.key == pygame.K_UP:
+                    game_field, delta = move_up(game_field)
+                elif event.key == pygame.K_DOWN:
+                    game_field, delta = move_down(game_field)
+                score += delta
+                if is_zero_cells(game_field):
+                    empty_cells = get_empty_cells(game_field)
+                    random.shuffle(empty_cells)
+                    num_to_fill = empty_cells.pop()
+                    x, y = get_index_from_number(len(game_field[0]), num_to_fill)
+                    game_field = insert_2_or_4(game_field, x, y)
+                    print(f"Filling cell {num_to_fill}")
+                draw_interface(score, delta)
+                pygame.display.update()
+
+
+score = 0
 game_field = [
-    [0, 0, 0, 0],
-    [0, 0, 0, 0],
-    [0, 0, 0, 0],
-    [0, 0, 0, 0],
-]
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+    ]
+init_values()
+username = ""
 game_field[0][2] = 2
 game_field[2][1] = 4
 
@@ -137,7 +193,6 @@ COLOR_TEXT = (255, 127, 0)
 WHITE = (255, 255, 255)
 GREY = (130, 130, 130)
 BLACK = (0, 0, 0)
-score = 0
 
 blocks = len(game_field[0])
 size_block = 110
@@ -152,34 +207,9 @@ pretty_print(game_field)
 pygame.init()
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption("2048")
-draw_intro()
-draw_interface(score)
-pygame.display.update()
 
-while is_zero_cells(game_field) or is_possible_move(game_field):
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit(0)
-        elif event.type == pygame.KEYDOWN:
-            delta = 0
-            if event.key == pygame.K_LEFT:
-                game_field, delta = move_left(game_field)
-            elif event.key == pygame.K_RIGHT:
-                game_field, delta = move_right(game_field)
-            elif event.key == pygame.K_UP:
-                game_field, delta = move_up(game_field)
-            elif event.key == pygame.K_DOWN:
-                game_field, delta = move_down(game_field)
-            score += delta
-            if is_zero_cells(game_field):
-                empty_cells = get_empty_cells(game_field)
-                random.shuffle(empty_cells)
-                num_to_fill = empty_cells.pop()
-                x, y = get_index_from_number(len(game_field[0]), num_to_fill)
-                game_field = insert_2_or_4(game_field, x, y)
-                print(f"Filling cell {num_to_fill}")
-            draw_interface(score, delta)
-            pygame.display.update()
-
-draw_gameover()
+while True:
+    if username is None:
+        draw_intro()
+    game_loop()
+    draw_gameover()

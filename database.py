@@ -22,6 +22,6 @@ def get_best_result():
 
 def insert_result(name, score):
     cur.execute("""
-        INSERN INTO records values ( ?, ?)
+        INSERT INTO records values ( ?, ?)
     """, (name, score))
     bd.commit()
