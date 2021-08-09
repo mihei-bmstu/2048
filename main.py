@@ -1,7 +1,7 @@
 import pygame
 import sys
 from logics import *
-from database import get_best_result, insert_result, cur
+from database import get_best_result, insert_result
 
 
 def init_values():
@@ -13,6 +13,14 @@ def init_values():
         [0, 0, 0, 0],
     ]
     score = 0
+    empty_cells = get_empty_cells(game_field)
+    random.shuffle(empty_cells)
+    init_num1 = empty_cells.pop()
+    init_num2 = empty_cells.pop()
+    x1, y1 = get_index_from_number(len(game_field[0]), init_num1)
+    x2, y2 = get_index_from_number(len(game_field[0]), init_num2)
+    game_field = insert_2_or_4(game_field, x1, y1)
+    game_field = insert_2_or_4(game_field, x2, y2)
 
 
 def draw_intro():
@@ -88,18 +96,19 @@ def draw_gameover():
         screen.blit(text_record, (30, 330))
         screen.blit(pygame.transform.scale(img2048, (200, 200,)), (10, 10))
         pygame.display.update()
+        screen.fill(BLACK)
 
 
 def draw_top_gamers():
     font_top = pygame.font.SysFont("simsun", 30)
     font_gamer = pygame.font.SysFont("simsun", 20)
     text_head = font_top.render("Best: ", True, COLOR_TEXT)
-    screen.blit(text_head, (250, 5))
+    screen.blit(text_head, (300, 5))
     for index, gamer in enumerate(GAMERS_DB):
         name, _score = gamer
         s = f"{index + 1}. {name} - {_score}"
         text_gamer = font_gamer.render(s, True, COLOR_TEXT)
-        screen.blit(text_gamer, (250, 35 + 25 * index))
+        screen.blit(text_gamer, (300, 35 + 25 * index))
 
 
 def draw_interface(cur_score, cur_delta=0):
@@ -135,6 +144,7 @@ def game_loop():
     global score, game_field
     draw_interface(score)
     pygame.display.update()
+    is_button_click = False
     while is_zero_cells(game_field) or is_possible_move(game_field):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -144,20 +154,25 @@ def game_loop():
                 delta = 0
                 if event.key == pygame.K_LEFT:
                     game_field, delta = move_left(game_field)
+                    is_button_click = True
                 elif event.key == pygame.K_RIGHT:
                     game_field, delta = move_right(game_field)
+                    is_button_click = True
                 elif event.key == pygame.K_UP:
                     game_field, delta = move_up(game_field)
+                    is_button_click = True
                 elif event.key == pygame.K_DOWN:
                     game_field, delta = move_down(game_field)
+                    is_button_click = True
                 score += delta
-                if is_zero_cells(game_field):
+                if is_zero_cells(game_field) and is_button_click:
                     empty_cells = get_empty_cells(game_field)
                     random.shuffle(empty_cells)
                     num_to_fill = empty_cells.pop()
                     x, y = get_index_from_number(len(game_field[0]), num_to_fill)
                     game_field = insert_2_or_4(game_field, x, y)
                     print(f"Filling cell {num_to_fill}")
+                    is_button_click = False
                 draw_interface(score, delta)
                 pygame.display.update()
 
@@ -170,9 +185,7 @@ game_field = [
         [0, 0, 0, 0],
     ]
 init_values()
-username = ""
-game_field[0][2] = 2
-game_field[2][1] = 4
+username = None
 
 GAMERS_DB = get_best_result()
 COLORS = {
