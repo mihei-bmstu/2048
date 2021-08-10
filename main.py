@@ -2,6 +2,8 @@ import pygame
 import sys
 from logics import *
 from database import get_best_result, insert_result
+import json
+import os
 
 
 def init_values():
@@ -59,14 +61,14 @@ def draw_intro():
 
 
 def draw_gameover():
-    global username
+    global username, GAMERS_DB
     img2048 = pygame.image.load("2048_logo.png")
     font = pygame.font.SysFont("stxingkai", 64)
     text_gameover = font.render("Game over!", True, WHITE)
     text_score = font.render(f"Вы набрали: {score}", True, WHITE)
     try:
         best_score = GAMERS_DB[0][1]
-    except:
+    except IndexError:
         best_score = 100
     if score > best_score:
         text = "Рекорд побит"
@@ -74,6 +76,7 @@ def draw_gameover():
         text = f"Рекорд: {best_score}"
     text_record = font.render(text, True, WHITE)
     insert_result(username, score)
+    GAMERS_DB = get_best_result()
     make_decision = False
     while not make_decision:
         for _event in pygame.event.get():
@@ -144,48 +147,64 @@ def game_loop():
     global score, game_field
     draw_interface(score)
     pygame.display.update()
-    is_button_click = False
+    was_moved = False
     while is_zero_cells(game_field) or is_possible_move(game_field):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                save_game()
                 pygame.quit()
                 sys.exit(0)
             elif event.type == pygame.KEYDOWN:
                 delta = 0
                 if event.key == pygame.K_LEFT:
-                    game_field, delta = move_left(game_field)
-                    is_button_click = True
+                    game_field, delta, was_moved = move_left(game_field)
                 elif event.key == pygame.K_RIGHT:
-                    game_field, delta = move_right(game_field)
-                    is_button_click = True
+                    game_field, delta, was_moved = move_right(game_field)
                 elif event.key == pygame.K_UP:
-                    game_field, delta = move_up(game_field)
-                    is_button_click = True
+                    game_field, delta, was_moved = move_up(game_field)
                 elif event.key == pygame.K_DOWN:
-                    game_field, delta = move_down(game_field)
-                    is_button_click = True
+                    game_field, delta, was_moved = move_down(game_field)
                 score += delta
-                if is_zero_cells(game_field) and is_button_click:
+                if is_zero_cells(game_field) and was_moved:
                     empty_cells = get_empty_cells(game_field)
                     random.shuffle(empty_cells)
                     num_to_fill = empty_cells.pop()
                     x, y = get_index_from_number(len(game_field[0]), num_to_fill)
                     game_field = insert_2_or_4(game_field, x, y)
                     print(f"Filling cell {num_to_fill}")
-                    is_button_click = False
+                    was_moved = False
                 draw_interface(score, delta)
                 pygame.display.update()
 
 
+def save_game():
+    data = {
+        "user": username,
+        "score": score,
+        "field": game_field
+    }
+    with open("data.txt", "w") as output:
+        json.dump(data, output)
+
+
 score = 0
 game_field = [
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-    ]
-init_values()
+    [0, 0, 0, 0],
+    [0, 0, 0, 0],
+    [0, 0, 0, 0],
+    [0, 0, 0, 0],
+]
 username = None
+path = os.getcwd()
+if "data.txt" in os.listdir(path):
+    with open("data.txt") as file:
+        data = json.load(file)
+        game_field = data["field"]
+        username = data["user"]
+        score = data["score"]
+    os.remove((os.path.join(path, "data.txt")))
+else:
+    init_values()
 
 GAMERS_DB = get_best_result()
 COLORS = {

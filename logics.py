@@ -1,4 +1,5 @@
 import random
+import copy
 
 
 def pretty_print(arr):
@@ -49,6 +50,7 @@ def is_zero_cells(arr):
 
 def move_left(arr):
     """"function to move all elements to the left"""
+    origin = copy.deepcopy(arr)
     n = len(arr[0])
     delta = 0
     for row in arr:
@@ -63,11 +65,12 @@ def move_left(arr):
                 delta += arr[i][j]
                 arr[i].pop(j+1)
                 arr[i].append(0)
-    return arr, delta
+    return arr, delta, not origin == arr
 
 
 def move_right(arr):
     """"function to move all elements to the right"""
+    origin = copy.deepcopy(arr)
     n = len(arr[0])
     delta = 0
     for row in arr:
@@ -82,11 +85,12 @@ def move_right(arr):
                 delta += arr[i][j]
                 arr[i].pop(j-1)
                 arr[i].insert(0, 0)
-    return arr, delta
+    return arr, delta, not origin == arr
 
 
 def move_up(arr):
     """"function to move all elements up"""
+    origin = copy.deepcopy(arr)
     n = len(arr[0])
     delta = 0
     for j in range(n):
@@ -104,11 +108,12 @@ def move_up(arr):
                 column.append(0)
         for i in range(n):
             arr[i][j] = column[i]
-    return arr, delta
+    return arr, delta, not origin == arr
 
 
 def move_down(arr):
     """"function to move all elements down"""
+    origin = copy.deepcopy(arr)
     n = len(arr[0])
     delta = 0
     for j in range(n):
@@ -126,7 +131,7 @@ def move_down(arr):
                 column.insert(0, 0)
         for i in range(n):
             arr[i][j] = column[i]
-    return arr, delta
+    return arr, delta, not origin == arr
 
 
 def is_possible_move(arr):
@@ -135,5 +140,9 @@ def is_possible_move(arr):
     for i in range(n - 1):
         for j in range(n - 1):
             if arr[i][j] == arr[i][j+1] or arr[i][j] == arr[i+1][j]:
+                return True
+    for i in range(1, n):
+        for j in range(1, n):
+            if arr[i][j] == arr[i-1][j] or arr[i][j] == arr[i][j-1]:
                 return True
     return False
